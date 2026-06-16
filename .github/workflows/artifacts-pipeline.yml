@@ -1,0 +1,54 @@
+name: Artifacts Pipeline
+
+on:
+  workflow_dispatch:
+
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create a file
+        run: |
+          mkdir output
+          echo "App: myapp" > output/build-info.txt
+          echo "Run: ${{ github.run_number }}" >> output/build-info.txt
+          echo "Branch: ${{ github.ref_name }}" >> output/build-info.txt
+          cat output/build-info.txt
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-output
+          path: output/build-info.txt
+
+  test:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: build-output
+          path: downloaded/
+
+      - name: Use artifact
+        run: |
+          echo "Reading artifact from build job..."
+          cat downloaded/build-info.txt
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: build-output
+          path: downloaded/
+
+      - name: Deploy with artifact
+        run: |
+          echo "Deploying using artifact..."
+          cat downloaded/build-info.txt
+          echo "Deployed successfully!"
