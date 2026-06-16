@@ -1,0 +1,75 @@
+name: Matrix Pipeline
+
+on:
+  workflow_dispatch:
+
+jobs:
+
+  # ══════════════════════════════════════
+  # BASIC MATRIX — test on 3 Node versions
+  # ══════════════════════════════════════
+  test-node-versions:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [16, 18, 20]
+    steps:
+      - name: Setup Node ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Print Node version
+        run: |
+          echo "Running on Node: ${{ matrix.node-version }}"
+          node --version
+
+  # ══════════════════════════════════════
+  # MULTI DIMENSION MATRIX
+  # test on multiple OS AND Node versions
+  # ══════════════════════════════════════
+  test-multi-dimension:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        node-version: [18, 20]
+    steps:
+      - name: Print combination
+        run: |
+          echo "OS: ${{ matrix.os }}"
+          echo "Node: ${{ matrix.node-version }}"
+
+  # ══════════════════════════════════════
+  # MATRIX WITH EXCLUDE
+  # skip specific combinations
+  # ══════════════════════════════════════
+  test-with-exclude:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        node-version: [16, 18, 20]
+        exclude:
+          - os: windows-latest
+            node-version: 16    # skip Node 16 on Windows
+    steps:
+      - name: Print combination
+        run: |
+          echo "OS: ${{ matrix.os }}"
+          echo "Node: ${{ matrix.node-version }}"
+
+  # ══════════════════════════════════════
+  # MATRIX WITH FAIL-FAST
+  # if one combination fails stop all others
+  # ══════════════════════════════════════
+  test-fail-fast:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false    # keep running other combinations even if one fails
+      matrix:
+        environment: [dev, staging, production]
+    steps:
+      - name: Deploy to ${{ matrix.environment }}
+        run: |
+          echo "Deploying to: ${{ matrix.environment }}"
