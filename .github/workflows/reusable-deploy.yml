@@ -1,0 +1,24 @@
+name: Reusable Deploy Workflow
+
+on:
+  workflow_call:        # this makes it reusable
+    inputs:
+      environment:
+        required: true
+        type: string
+      appName:
+        required: true
+        type: string
+    secrets:
+      DEPLOY_KEY:
+        required: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy
+        run: |
+          echo "Deploying ${{ inputs.appName }}"
+          echo "Environment: ${{ inputs.environment }}"
+          echo "Deploy key: ${{ secrets.DEPLOY_KEY }}"
