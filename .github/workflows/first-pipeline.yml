@@ -1,0 +1,39 @@
+name: My First GitHub Actions Pipeline
+
+on:
+  workflow_dispatch:
+
+jobs:
+
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Print info
+        run: |
+          echo "Pipeline started!"
+          echo "Branch: ${{ github.ref_name }}"
+          echo "Triggered by: ${{ github.actor }}"
+          echo "Repo: ${{ github.repository }}"
+
+  build:
+    needs: validate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Build
+        run: |
+          echo "Validate passed!"
+          echo "Now building..."
+          echo "Build number: ${{ github.run_number }}"
+
+  notify:
+    needs: [validate, build]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Notify
+        run: |
+          echo "Pipeline finished!"
+          echo "Triggered by: ${{ github.actor }}"
